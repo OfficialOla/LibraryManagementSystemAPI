@@ -1,20 +1,20 @@
-from django.shortcuts import render, get_object_or_404
-from django.template.context_processors import request
-from django.http import HttpResponse
-from rest_framework.decorators import api_view
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.mixins import ListModelMixin
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
+from django.core.mail import send_mail, EmailMessage, get_connection
+from django.http import BadHeaderError, HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import api_view
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, DjangoModelPermissions
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
+from templated_mail.mail import BaseEmailMessage
 
-from .models import Book
-from .models import Author
-from .serializers import AuthorSerializer, BookSerializer
-from .pagination import DefaultPagination
 from .filters import AuthorFilter
+from .filters import BookFilter
+from .models import Author
+from .models import Book
+from .pagination import DefaultPagination
+from .permissions import IsAdminOrReadOnly
+from .serializers import AuthorSerializer, BookSerializer
 
 
 # Create your views here.
@@ -46,17 +46,41 @@ class AuthorViewSet(ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
     pagination_class = DefaultPagination
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = AuthorFilter
+    search_fields = ['first_name']
+    # custom permissions config
+    # permission_classes = [IsAuthenticated]
+    # permission_classes = [DjangoModelPermissions]
+
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class BookViewSet(ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     pagination_class = DefaultPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = BookFilter
+    search_fields = ['title']
+    permission_classes = [IsAdminUser]
 
 
-#
+def send_mail_function(request):
+    # use send_mass_mail to send if more than one recipient
+    try:
+        # message = EmailMessage("library message", "Hi, your book order is available now!"
+        #                        , "info.yoglobals@gmail.com", ["ojo@gmail.com"])
+        # message.attach_file('myBooks\\static\\images\\Ola.png')
+        message = BaseEmailMessage(
+            context={"name": "Tinuade"},
+            template_name='myBooks/email.html')
+        message.send(to=['ola@gmail.com'])
+    except BadHeaderError:
+        pass
+    return HttpResponse('ok')
+
+# Send the email
 # class AuthorDetailView(RetrieveUpdateDestroyAPIView):
 #     queryset = Author.objects.all()
 #     serializer_class = AuthorSerializer

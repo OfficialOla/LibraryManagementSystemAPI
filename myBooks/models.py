@@ -7,7 +7,7 @@ from django.db import models
 # Create your models here.
 # Always define your User before the database,
 # do this below and go to your settings AUTH_USER_MODEL and write the name of the appName.user
-# even if you're not sure of the fields, just do this first class User(AbstratUser): pass
+# even if you're not sure of the fields, just do this first class User(AbstractUser): pass
 # You can change the behaviour of the fields in abstract user
 
 class User(AbstractUser):

@@ -4,6 +4,8 @@ from _decimal import Decimal
 from rest_framework import serializers
 
 from myBooks.models import Author, Book
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from djoser.serializers import UserSerializer as BaseCurrentUserSerializer
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -38,3 +40,13 @@ class BookSerializer(serializers.ModelSerializer):
     # price = serializers.DecimalField(max_digits=6, decimal_places=2)
     # genre = serializers.CharField(max_length=10, )
     # book_number = serializers.CharField(max_length=13, source='isbn')
+
+
+class UserCreateSerializer(BaseUserCreateSerializer):
+    class Meta(BaseUserCreateSerializer.Meta):
+        fields = ['username', 'email', 'first_name', 'last_name', 'password']
+
+
+class CurrentUserSerializer(BaseCurrentUserSerializer):
+    class Meta(BaseCurrentUserSerializer.Meta):
+        fields = ['username', 'email', 'first_name', 'last_name', 'password']

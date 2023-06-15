@@ -6,8 +6,11 @@ from rest_framework.routers import SimpleRouter, DefaultRouter
 router = DefaultRouter()
 router.register('authors', views.AuthorViewSet)
 router.register('books', views.BookViewSet)
-
-urlpatterns = router.urls
+urlpatterns = [
+    path('', include(router.urls)),
+    path('send_mail/', views.send_mail_function),
+]
+# urlpatterns = router.urls
 # print(router.urls)
 #
 # urlpatterns = [
